@@ -25,7 +25,7 @@ def rosenbrock_grad(x):
     grad[-1] = 200 * (x[-1] - x[-2]**2)
     return grad
 
-def bfgs(x0, func, grad_func, tol=1e-6, max_iter=1000):
+def bfgs(x0, func, grad_func, n_beads, tol=1e-6, max_iter=1000):
     """
     Minimize a function using the BFGS algorithm.
 
@@ -44,7 +44,8 @@ def bfgs(x0, func, grad_func, tol=1e-6, max_iter=1000):
     n = len(x)
     I = np.eye(n)
     H = I  # Initial inverse Hessian approximation
-    g = grad_func(x)
+    g = grad_func(x, n_beads)
+    trajectory = [x.copy()]
     for k in range(max_iter):
         if np.linalg.norm(g) < tol:
             print(f"Converged in {k} iterations.")
@@ -55,28 +56,41 @@ def bfgs(x0, func, grad_func, tol=1e-6, max_iter=1000):
         c = 1e-4
         rho = 0.9
         # Backtracking line search
-        while func(x + alpha * p) > func(x) + c * alpha * g.dot(p):
+        while func(x + alpha * p, n_beads) > func(x, n_beads) + c * alpha * g.dot(p):
             alpha *= rho
         x_new = x + alpha * p
-        g_new = grad_func(x_new)
+        g_new = grad_func(x_new, n_beads)
         s = x_new - x
         y = g_new - g
         ys = y.dot(s)
         if ys > 1e-10:  # Avoid division by zero
-            rho_k = 1.0 / ys
+            """
+            sos = np.outer(s,s)
+            yos = np.outer(y,s)
+            soy = np.outer(s,y)
+            H = H + (ys + y.dot(H.dot(y)))*(sos)/(ys**2) - (H.dot(yos) + soy.dot(H))/ys
+            """
             I = np.eye(n)
+            rho_k = 1.0 / ys
             H = (I - rho_k * np.outer(s, y)).dot(H).dot(I - rho_k * np.outer(y, s)) + rho_k * np.outer(s, s)
+            
         else:
             H = I  # Reset if ys is too small
         x = x_new
         g = g_new
+        trajectory.append(x.copy())  # Append current step to trajectory
     else:
         print(f"Maximum iterations ({max_iter}) reached.")
-    f_val = func(x)
-    return x, f_val
+    f_val = func(x, n_beads)
+    return x, f_val, trajectory
 
-# Initial guess
-x0 = np.array([-1.2, 1.0])
+"""
+if __name__ == "__main__":
+    # Initial guess
+    x0 = np.array([-1.2, 1.0])
 
-# Run the BFGS algorithm
-x_min, f_min = bfgs(x0, rosenbrock, rosenbrock_grad)
+    # Run the BFGS algorithm
+    
+    _min, f_min, trajectory = bfgs(x0, rosenbrock, rosenbrock_grad)
+    print(_min)
+    """

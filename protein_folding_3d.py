@@ -3,6 +3,10 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
+import bfgs
+
+import matplotlib
+matplotlib.use('TkAgg')
 
 # Initialize protein positions
 def initialize_protein(n_beads, dimension=3, fudge = 1e-5):
@@ -64,7 +68,37 @@ def optimize_protein(positions, n_beads, write_csv=False):
         trajectory.append(x.reshape((n_beads, -1)))
         if len(trajectory) % 20 == 0:
             print(len(trajectory))
+    
+    # Define the gradient of the total energy function
+    def grad_total_energy(positions, n_beads, epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
+        """
+        Compute the gradient (derivative) of the total energy function.
+        """
+        positions = positions.reshape((n_beads, -1))
+        gradient = np.zeros_like(positions)
 
+        # Compute gradients for bond energy
+        for i in range(n_beads - 1):
+            r_vec = positions[i+1] - positions[i]
+            r = np.linalg.norm(r_vec)
+            grad_bond = 2 * k_b * (r - b) * (r_vec / r)
+            gradient[i] -= grad_bond
+            gradient[i+1] += grad_bond
+
+        # Compute gradients for Lennard-Jones potential
+        for i in range(n_beads):
+            for j in range(i+1, n_beads):
+                r_vec = positions[i] - positions[j]
+                r = np.linalg.norm(r_vec)
+                if r > 1e-2:  # Avoid division by zero
+                    grad_lj = 48 * epsilon * ((sigma / r)**12 - 0.5 * (sigma / r)**6) * r_vec / r**2
+                    gradient[i] += grad_lj
+                    gradient[j] -= grad_lj
+
+        return gradient.flatten()
+
+    result, energy, trajectory = bfgs.bfgs(positions.flatten(), total_energy, grad_total_energy, n_beads, 1e-6, 1000) 
+    """
     result = minimize(
         fun=total_energy,
         x0=positions.flatten(),
@@ -73,6 +107,7 @@ def optimize_protein(positions, n_beads, write_csv=False):
         callback=callback,
         options={'disp': True}
     )
+    """
     if write_csv:
         csv_filepath = f'protein{n_beads}.csv'
         print(f'Writing data to file {csv_filepath}')
