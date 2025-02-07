@@ -7,7 +7,7 @@ import bfgs
 import energy_wrapper
 
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 
 # Initialize protein positions
 def initialize_protein(n_beads, dimension=3, fudge = 1e-5):
@@ -181,5 +181,5 @@ if __name__ == "__main__":
     plot_protein_3d(optimized_positions, title="Optimized Configuration")
 
     # Animate the optimization process
-    print(trajectory[0])
+    #print(trajectory[0])
     animate_optimization(trajectory)
