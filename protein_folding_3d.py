@@ -99,7 +99,7 @@ def optimize_protein(positions, n_beads,  write_csv=False, maxiter = 1000, tol =
         return gradient.flatten()
     
     result, energy, trajectory = bfgs.bfgs(positions.flatten(), energy_wrapper.compute_total_energy , energy_wrapper.compute_gradient, n_beads, tol, maxiter) 
-    
+    """
     result = minimize(
         fun=total_energy,
         x0=result.flatten(),
@@ -108,8 +108,8 @@ def optimize_protein(positions, n_beads,  write_csv=False, maxiter = 1000, tol =
         callback=callback,
         options={'disp': True, 'maxiter' : 1}
     )
-    print(type(result), type(result.x))
-    
+    #print(type(result), type(result.x))
+    """
     if write_csv:
         csv_filepath = f'protein{n_beads}.csv'
         print(f'Writing data to file {csv_filepath}')
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     plot_protein_3d(initial_positions, title="Initial Configuration")
 
     result, trajectory = optimize_protein(initial_positions, n_beads, write_csv = True, maxiter = 3000)
-    optimized_positions = result.x.reshape((n_beads, dimension))
+    optimized_positions = result.reshape((n_beads, dimension))
     print("Optimized Energy:", total_energy(optimized_positions.flatten(), n_beads))
     plot_protein_3d(optimized_positions, title="Optimized Configuration")
 
