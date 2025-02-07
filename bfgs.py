@@ -44,7 +44,7 @@ def bfgs(x0, func, grad_func, n_beads, tol=1e-6, max_iter=1000):
     n = len(x)
     I = np.eye(n)
     H = I  # Initial inverse Hessian approximation
-    g = grad_func(x, n_beads)
+    g = grad_func(x)
     trajectory = [x.copy()]
     for k in range(max_iter):
         if np.linalg.norm(g) < tol:
@@ -56,10 +56,10 @@ def bfgs(x0, func, grad_func, n_beads, tol=1e-6, max_iter=1000):
         c = 1e-4
         rho = 0.9
         # Backtracking line search
-        while func(x + alpha * p, n_beads) > func(x, n_beads) + c * alpha * g.dot(p):
+        while func(x + alpha * p) > func(x) + c * alpha * g.dot(p):
             alpha *= rho
         x_new = x + alpha * p
-        g_new = grad_func(x_new, n_beads)
+        g_new = grad_func(x_new)
         s = x_new - x
         y = g_new - g
         ys = y.dot(s)
@@ -81,7 +81,7 @@ def bfgs(x0, func, grad_func, n_beads, tol=1e-6, max_iter=1000):
         trajectory.append(x.copy())  # Append current step to trajectory
     else:
         print(f"Maximum iterations ({max_iter}) reached.")
-    f_val = func(x, n_beads)
+    f_val = func(x)
     return x, f_val, trajectory
 
 """

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 import bfgs
+import energy_wrapper
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -58,7 +59,7 @@ def total_energy(positions, n_beads, epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
     return energy
 
 # Optimization function
-def optimize_protein(positions, n_beads, write_csv=False):
+def optimize_protein(positions, n_beads, tol = 1e-6, max_iter = 1000, write_csv=False):
     """
     Optimize the positions of the protein to minimize total energy.
     """
@@ -96,8 +97,8 @@ def optimize_protein(positions, n_beads, write_csv=False):
                     gradient[j] -= grad_lj
 
         return gradient.flatten()
-
-    result, energy, trajectory = bfgs.bfgs(positions.flatten(), total_energy, grad_total_energy, n_beads, 1e-6, 1000) 
+    """
+    result, energy, trajectory = bfgs.bfgs(positions.flatten(), energy_wrapper.compute_total_energy , energy_wrapper.compute_gradient, n_beads, 1e-6, 1000) 
     """
     result = minimize(
         fun=total_energy,
@@ -107,7 +108,8 @@ def optimize_protein(positions, n_beads, write_csv=False):
         callback=callback,
         options={'disp': True}
     )
-    """
+    #print(type(result), type(result.x))
+    
     if write_csv:
         csv_filepath = f'protein{n_beads}.csv'
         print(f'Writing data to file {csv_filepath}')
@@ -174,10 +176,10 @@ if __name__ == "__main__":
     plot_protein_3d(initial_positions, title="Initial Configuration")
 
     result, trajectory = optimize_protein(initial_positions, n_beads, write_csv = True)
-
-    optimized_positions = result.x.reshape((n_beads, dimension))
+    optimized_positions = result.reshape((n_beads, dimension))
     print("Optimized Energy:", total_energy(optimized_positions.flatten(), n_beads))
     plot_protein_3d(optimized_positions, title="Optimized Configuration")
 
     # Animate the optimization process
+    print(trajectory[0])
     animate_optimization(trajectory)
