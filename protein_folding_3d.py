@@ -7,7 +7,7 @@ import bfgs
 import energy_wrapper
 
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 
 # Initialize protein positions
 def initialize_protein(n_beads, dimension=3, fudge = 1e-5):
