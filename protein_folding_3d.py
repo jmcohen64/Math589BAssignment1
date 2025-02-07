@@ -59,7 +59,7 @@ def total_energy(positions, n_beads, epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
     return energy
 
 # Optimization function
-def optimize_protein(positions, n_beads,  write_csv=False, max_iter = 1000,tol = 1e-6):
+def optimize_protein(positions, n_beads,  write_csv=False, maxiter = 1000, tol = 1e-6):
     """
     Optimize the positions of the protein to minimize total energy.
     """
@@ -98,7 +98,7 @@ def optimize_protein(positions, n_beads,  write_csv=False, max_iter = 1000,tol =
 
         return gradient.flatten()
     
-    result, energy, trajectory = bfgs.bfgs(positions.flatten(), energy_wrapper.compute_total_energy , energy_wrapper.compute_gradient, n_beads, 1e-6, 1000) 
+    result, energy, trajectory = bfgs.bfgs(positions.flatten(), energy_wrapper.compute_total_energy , energy_wrapper.compute_gradient, n_beads, tol, maxiter) 
     """
     result = minimize(
         fun=total_energy,
