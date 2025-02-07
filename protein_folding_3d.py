@@ -59,7 +59,7 @@ def total_energy(positions, n_beads, epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
     return energy
 
 # Optimization function
-def optimize_protein(positions, n_beads, tol = 1e-6, max_iter = 1000, write_csv=False):
+def optimize_protein(positions, n_beads,  write_csv=False, max_iter = 1000,tol = 1e-6):
     """
     Optimize the positions of the protein to minimize total energy.
     """
@@ -97,7 +97,7 @@ def optimize_protein(positions, n_beads, tol = 1e-6, max_iter = 1000, write_csv=
                     gradient[j] -= grad_lj
 
         return gradient.flatten()
-    """
+    
     result, energy, trajectory = bfgs.bfgs(positions.flatten(), energy_wrapper.compute_total_energy , energy_wrapper.compute_gradient, n_beads, 1e-6, 1000) 
     """
     result = minimize(
@@ -109,7 +109,7 @@ def optimize_protein(positions, n_beads, tol = 1e-6, max_iter = 1000, write_csv=
         options={'disp': True}
     )
     #print(type(result), type(result.x))
-    
+    """
     if write_csv:
         csv_filepath = f'protein{n_beads}.csv'
         print(f'Writing data to file {csv_filepath}')
