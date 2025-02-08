@@ -47,6 +47,10 @@ def bfgs(x0, func, grad_func, n_beads, tol=1e-6, max_iter=1000):
     g = grad_func(x)
     trajectory = [x.copy()]
     for k in range(max_iter):
+        """
+        if k%100 == 0:
+            print("iterating")
+        """
         if np.linalg.norm(g) < tol:
             print(f"Converged in {k} iterations.")
             break
@@ -57,8 +61,10 @@ def bfgs(x0, func, grad_func, n_beads, tol=1e-6, max_iter=1000):
         c2 = 0.9
         rho = 0.9
         # Backtracking line search
-        while (func(x + alpha * p) > func(x) + c1 * alpha * g.dot(p) ) or ( p.dot(grad_func(x + alpha*p)) < c2*p.dot(g)):
+        while (func(x + alpha * p) > func(x) + c1 * alpha * g.dot(p) ) or ( abs(p.dot(grad_func(x + alpha*p))) > abs(c2*p.dot(g))):
             alpha *= rho
+            if alpha < 1e-6:  # Avoid infinite loop
+                break
         x_new = x + alpha * p
         g_new = grad_func(x_new)
         s = x_new - x
