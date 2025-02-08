@@ -53,10 +53,11 @@ def bfgs(x0, func, grad_func, n_beads, tol=1e-6, max_iter=1000):
         p = -H.dot(g)
         # Line search parameters
         alpha = 1
-        c = 1e-4
+        c1 = 1e-4
+        c2 = 0.9
         rho = 0.9
         # Backtracking line search
-        while func(x + alpha * p) > func(x) + c * alpha * g.dot(p):
+        while (func(x + alpha * p) > func(x) + c1 * alpha * g.dot(p) ) or ( p.dot(grad_func(x + alpha*p)) < c2*p.dot(g)):
             alpha *= rho
         x_new = x + alpha * p
         g_new = grad_func(x_new)

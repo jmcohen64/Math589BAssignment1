@@ -103,7 +103,7 @@ def optimize_protein(positions, n_beads,  write_csv=False, maxiter = 1000, tol =
         return gradient.flatten()
     
     result, energy, trajectory = bfgs.bfgs(positions.flatten(), energy_wrapper.compute_total_energy , energy_wrapper.compute_gradient, n_beads, tol, maxiter) 
-    
+
     result = Result(result)
     
     """
@@ -192,3 +192,4 @@ if __name__ == "__main__":
     # Animate the optimization process
     #print(trajectory[0])
     animate_optimization(trajectory)
+
